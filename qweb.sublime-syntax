@@ -1,0 +1,45 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - qq
+scope: text.qweb
+contexts:
+  main:
+    # Embedded C sections start with %= or %+ and have an identifier inside << >> markers
+    - match: '^\s*%[=+]'
+      scope: punctuation.section.embedded.begin.qweb
+      push: code_heading
+
+    # Comments begin with a '%--' and finish at the end of the line
+    - match: '^\s*%--'
+      scope: punctuation.definition.comment.qweb
+      push: line_comment
+
+    # Any other lines (outside of code blocks) that start with a % are directives.
+    #
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '^\s*%\b(section|subsection|subsubsection|docfile|require)\b'
+      scope: keyword.control.qweb
+      push: heading
+
+  line_comment:
+    - meta_scope: comment.line.qweb
+    - match: $
+      pop: true
+
+  heading:
+    - meta_scope: markup.heading.qweb
+    - match: $
+      pop: true
+
+  code_heading:
+    - meta_scope: entity.name.function.qweb
+    - match: $
+      set: Packages/C++/C++.sublime-syntax
+      with_prototype:
+        - match: (?=^\s*%\.)
+          pop: true

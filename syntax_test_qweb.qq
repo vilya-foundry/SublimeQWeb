@@ -1,0 +1,13 @@
+// SYNTAX TEST "Packages/User/qweb.sublime-syntax"
+
+// <- text.qweb
+
+%= << PUB: Foo usage >>
+
+// <- source.c++
+
+%.
+// <- text.qweb
+
+Hello world
+// <- text.qweb
