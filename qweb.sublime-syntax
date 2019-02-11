@@ -3,18 +3,32 @@
 # See http://www.sublimetext.com/docs/3/syntax.html
 file_extensions:
   - qq
+
 scope: text.qweb
+
+variables:
+  stream: '\([^\)]+\)'
+  directive_prefix: '^\s*%'
+  directive: '{{directive_prefix}}({{stream}})?'
+
 contexts:
   main:
     # Embedded C sections start with %= or %+ and have an identifier inside << >> markers
-    - match: '^\s*%[=+]'
+    - match: '{{directive}}[=+]'
       scope: punctuation.section.embedded.begin.qweb
       push: code_heading
 
     # Comments begin with a '%--' and finish at the end of the line
-    - match: '^\s*%--'
+    - match: '{{directive}}--'
       scope: punctuation.definition.comment.qweb
       push: line_comment
+
+    - match: '{{directive_prefix}}\b(docfile)\b\s+(\S+)'
+      captures:
+        1: keyword.control.qweb
+        2: entity.name.namespace
+      scope: keyword.control.qweb
+      push: heading
 
     # Any other lines (outside of code blocks) that start with a % are directives.
     #
@@ -22,7 +36,20 @@ contexts:
     # strings in YAML. When using single quoted strings, only single quotes
     # need to be escaped: this is done by using two single quotes next to each
     # other.
-    - match: '^\s*%\b(section|subsection|subsubsection|docfile|require)\b'
+    - match: '{{directive_prefix}}({{stream}})?\b(section|subsection|subsubsection|include|require|contents|keyword|image|codeout)\b'
+      captures:
+        1: entity.name.namespace.qweb
+        2: keyword.control.qweb
+      scope: keyword.control.qweb
+      push: heading
+
+    - match: '{{directive}}\b(item)\b'
+      scope: markup.list.unnumbered.bullet.qweb
+
+    # A leading % can be followed by just a stream specifier, without any following keywords.
+    - match: '{{directive_prefix}}({{stream}})'
+      captures:
+        1: entity.name.namespace.qweb
       scope: keyword.control.qweb
       push: heading
 
